@@ -7,18 +7,18 @@
 // lcd device...
 //
 // Wiring:
-// PB1          RS
-// PB0          E
-// PB5..2       DB7..4
-// PD7          R/#W
+// PB4          RS
+// PB3          E
+// PB2          R/#W
+// PD7..4       DB7..4
 // Vcc -4k7-    DB3..0  (PULL THEM UP OR IT WON'T WORK!)
 
 // NOTE: PB7,6 are used for external crystal
 // PB3..4 can be used for ICSP as well
 
-#define RS          _BV(PB1)
-#define E           _BV(PB0)
-#define RW          _BV(PD7)
+#define RS          _BV(PB4)
+#define E           _BV(PB3)
+#define RW          _BV(PB2)
 
 // T = width of E clk high/low states (> 250 ns) in cpu cycles
 #if F_CPU < 4000000
@@ -38,14 +38,14 @@ lcd_wait_busy(void) {
     uint8_t lcd_status;
 
     PORTB &= ~RS;
-    DDRB &= 0xc3; // B[2..5] are inputs
-    PORTD |= RW;
+    DDRD &= 0x0f; // D[7..4] are inputs
+    PORTB |= RW;
 
     do {
         _delay_loop_1(T);
         PORTB |= E;
         _delay_loop_1(T);
-        lcd_status = (PINB << 2) & 0xf0;
+        lcd_status = PIND & 0xf0;
         PORTB &= ~E;
 
         _delay_loop_1(T);
@@ -54,8 +54,8 @@ lcd_wait_busy(void) {
         PORTB &= ~E;
     } while (lcd_status & 0x80);
 
-    PORTD &= ~RW;
-    DDRB |= 0x3c; // B[2..5] are outputs
+    PORTB &= ~RW;
+    DDRD |= 0xf0; // D[7..0] are outputs
 }
 
 void
@@ -64,12 +64,15 @@ lcd_cmd(uint8_t n)
     lcd_wait_busy();
 
     _delay_loop_1(T);
-    PORTB = ((n & 0xf0) >> 2) | E;   /* RS=0 */
+    PORTD = n & 0xf0;
+    PORTB &= ~RS;
+    PORTB |= E;
     _delay_loop_1(T);
     PORTB &= ~E;
     
     _delay_loop_1(T);
-    PORTB = ((n & 0x0f) << 2) | E;   /* RS=0 */
+    PORTD = n << 4;
+    PORTB |= E;
     _delay_loop_1(T);
     PORTB &= ~E;
 }
@@ -80,12 +83,15 @@ lcd_data(uint8_t n)
     lcd_wait_busy();
 
     _delay_loop_1(T);
-    PORTB = ((n & 0xf0) >> 2) | RS | E;   /* RS=1 */
+    PORTD = n & 0xf0;
+    PORTB |= RS;
+    PORTB |= E;
     _delay_loop_1(T);
     PORTB &= ~E;
     
     _delay_loop_1(T);
-    PORTB = ((n & 0x0f) << 2) | RS | E;   /* RS=1 */
+    PORTD = n << 4;
+    PORTB |= E;
     _delay_loop_1(T);
     PORTB &= ~E;
 }
@@ -98,7 +104,8 @@ lcdwrite(char c, FILE *f) {
 
 static void
 e_pulse(uint8_t c) {
-    PORTB = c | E;
+    PORTD = c << 4;
+    PORTB |= E;
     _delay_loop_1(T);
     PORTB &= ~E;
     _delay_loop_1(T);
@@ -108,18 +115,18 @@ void
 lcd_init(void)
 {
     PORTB = 0;
-    DDRB = 0x3c | RS | E; // enable used PORT bits as output
-    PORTD &= ~RW; // PD7 is low
-    DDRD |= RW; // enable PD7 as output
+    DDRB = RW | RS | E; // enable used PORT bits as output
+    DDRD |= 0xf0;
 
+    PORTB &= ~RS;
     _delay_ms(15);
-    e_pulse((((HD44780_CMD_FUNCTION_SET | HD44780_8_BIT) >> 4) << 2)); /* RS=0=instrmode */
+    e_pulse((HD44780_CMD_FUNCTION_SET | HD44780_8_BIT) >> 4);
     _delay_ms(5); // > 4.1 ms
-    e_pulse((((HD44780_CMD_FUNCTION_SET | HD44780_8_BIT) >> 4) << 2)); /* RS=0=instrmode */
+    e_pulse((HD44780_CMD_FUNCTION_SET | HD44780_8_BIT) >> 4);
     _delay_us(150); // > 100 us
-    e_pulse((((HD44780_CMD_FUNCTION_SET | HD44780_8_BIT) >> 4) << 2)); /* RS=0=instrmode */
+    e_pulse((HD44780_CMD_FUNCTION_SET | HD44780_8_BIT) >> 4);
     _delay_us(150); // not specified
-    e_pulse(((HD44780_CMD_FUNCTION_SET >> 4) << 2)); /* RS=0=instrmode */
+    e_pulse(HD44780_CMD_FUNCTION_SET >> 4);
     _delay_us(150); // not specified
 
     lcd_cmd(HD44780_CMD_FUNCTION_SET | HD44780_2_LINES);
