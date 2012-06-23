@@ -66,7 +66,7 @@ main(void)
 
     set_sleep_mode(SLEEP_MODE_IDLE);
     lcd_cmd(HD44780_CMD_CLEAR_DISPLAY);
-    printf("New pinout");
+    printf("Sw pullup D3..0");
     while (1) {
         uint8_t i, p;
         sleep_mode();
