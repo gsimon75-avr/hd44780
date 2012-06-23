@@ -66,7 +66,7 @@ main(void)
 
     set_sleep_mode(SLEEP_MODE_IDLE);
     lcd_cmd(HD44780_CMD_CLEAR_DISPLAY);
-    printf("Sw pullup D3..0");
+    printf("8bit at last");
     while (1) {
         uint8_t i, p;
         sleep_mode();
