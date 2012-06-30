@@ -29,8 +29,6 @@
 
 #define HD44780_BUSY                    0x80
 
-extern const uint8_t hexchar[];
-
 void lcd_init(void);
 void lcd_cmd(uint8_t cmd);
 void lcd_data(uint8_t n);
