@@ -66,7 +66,13 @@ main(void)
 
     set_sleep_mode(SLEEP_MODE_IDLE);
     lcd_cmd(HD44780_CMD_CLEAR_DISPLAY);
+#if HD44780_BIT == 8
     printf("8bit at last");
+#elif HD44780_BIT == 4
+    printf("4bit still");
+#else
+#error "Oops..."
+#endif
     while (1) {
         uint8_t i, p;
         sleep_mode();
