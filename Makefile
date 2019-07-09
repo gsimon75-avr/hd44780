@@ -44,3 +44,5 @@ test.elf:	test.o lcd.o
 #  Factory default is 0xe1 for low byte and 0xd9 for high byte
 #  hi=df lo=b7 -> external 
 # Check this with make rdfuses
+
+# vim: set sw=8 ts=8 noet:

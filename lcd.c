@@ -4,6 +4,7 @@
 #include "lcd.h"
 
 #if HD44780_BIT == 8
+
 // Wiring:
 // PB4          RS
 // PB3          E
@@ -12,7 +13,9 @@
 #define RS          _BV(PB4)
 #define E           _BV(PB3)
 #define RW          _BV(PB2)
+
 #elif HD44780_BIT == 4
+
 // Wiring:
 // PB1          RS
 // PB0          E
@@ -23,8 +26,11 @@
 #define RS          _BV(PB1)
 #define E           _BV(PB0)
 #define RW          _BV(PD7)
+
 #else
+
 #error You have to define HD44780_BIT to one of {8, 4}
+
 #endif
 
 // NOTE: PB7,6 are used for external crystal
